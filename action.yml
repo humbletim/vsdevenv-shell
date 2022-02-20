@@ -1,0 +1,16 @@
+name: 'vsdevenv-shell'
+description: 'provides a custom shell for invoking job steps within a vsdevcmd.bat developer environment'
+branding:
+  icon: 'play'
+  color: 'red'
+runs:
+  using: "composite"
+  steps:
+    - name: setup vsdevenv subshell path
+      shell: bash
+      run: |
+        if [[ $RUNNER_OS == 'Windows' ]] ; then
+          echo $GITHUB_ACTION_PATH/bin >> $GITHUB_PATH
+        else
+          echo "NOTE: skipping vsdevenv-shell integration (RUNNER_OS is $RUNNER_OS, not Windows)"
+        fi

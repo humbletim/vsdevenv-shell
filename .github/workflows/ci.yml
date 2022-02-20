@@ -1,0 +1,92 @@
+name: test vsdevenv-shell
+on:
+  push:
+jobs:
+  test-vsdevenv-shell:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./
+
+      - name: an earlier build step
+        shell: bash
+        run: |
+          echo "clean job environment (no dev tools)"
+          echo "$(env | wc -l) environment variables defined"
+
+      - name: specific step (executed within vsdevcmd.bat environment)
+        shell: vsdevenv x64 bash {0}
+        run: |
+          echo "$(env | wc -l) environment variables defined"
+          cl.exe # <-- cl.exe is available within this step
+          echo PreferredToolArchitecture=$PreferredToolArchitecture
+
+      - name: a later build step
+        shell: bash
+        run: |
+          echo "clean job environment (no dev tools)"
+          echo "$(env | wc -l) environment variables defined"
+
+      - name: custom shell test
+        shell: echo {0}
+        run: echo test 1 2 3
+
+      - name: Verify MSVC wrapper -- bash
+        shell: vsdevenv x64 bash {0}
+        run: cl
+
+      - name: Verify MSVC wrapper -- cmd
+        shell: vsdevenv x86 cmd {0}
+        run: cl
+
+      - name: Verify MSVC wrapper -- powershell
+        shell: vsdevenv arm64 powershell {0}
+        run: cl
+
+      - name: Verify MSVC wrapper -- pwsh
+        shell: vsdevenv arm64 pwsh {0}
+        run: cl
+
+      - name: cmake test -- vsdevenv x64 cmd 
+        shell: vsdevenv x64 cmd {0}
+        run: |
+          cmake -G "NMake Makefiles" -B tests\build-x64 -S tests -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. || exit /b %errorlevel%
+          cmake --build tests\build-x64 --config release || exit /b %errorlevel%
+          dir tests\build-x64\helloworld.exe
+          tests\build-x64\helloworld.exe 1 2 3 4
+
+      - name: cmake test -- vsdevenv x64 bash -A x64
+        shell: vsdevenv x64 bash {0}
+        run: |
+          cmake -A x64 -G "Visual Studio 16 2019" -B tests/build-Ax64 -S tests -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=.
+          cmake --build tests/build-Ax64 --config release
+          ls -l tests/build-Ax64/helloworld.exe
+          ./tests/build-Ax64/helloworld.exe 1 2 3 4
+
+      - name: cmake test -- vsdevenv x86 powershell
+        shell: vsdevenv x86 powershell {0}
+        run: |
+          cmake -G "NMake Makefiles" -B tests\build-x86 -S tests -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=.
+          cmake --build tests\build-x86 --config release
+          dir tests\build-x86\helloworld.exe
+          tests\build-x86\helloworld.exe 1 2 3 4
+
+      - name: cmake test -- vsdevenv x86 cmd -A Win32
+        shell: vsdevenv x86 cmd {0}
+        run: |
+          cmake -A Win32 -G "Visual Studio 16 2019" -B tests\build-Ax86 -S tests -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. || exit /b %errorlevel%
+          cmake --build tests\build-Ax86 --config release || exit /b %errorlevel%
+          dir tests\build-Ax86\helloworld.exe
+          tests\build-Ax86\helloworld.exe 1 2 3 4
+
+      - name: Verify MSVC wrapper FAIL -- cmd
+        shell: vsdevenv x86 cmd {0}
+        continue-on-error: true
+        run: |
+          cmake -A invalid -G Invalid || exit /b %errorlevel%
+
+      - name: Verify MSVC wrapper FAIL2 -- bash
+        shell: vsdevenv x86 bash {0}
+        continue-on-error: true
+        run: |
+          cmake -A invalid -G Invalid
