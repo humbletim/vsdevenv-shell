@@ -3,7 +3,7 @@ on:
   push:
 jobs:
   test-vsdevenv-shell:
-    stragegy:
+    strategy:
       matrix:
         os: [ windows-2019, windows-2022 ]
     runs-on: ${{ matrix.os }}
