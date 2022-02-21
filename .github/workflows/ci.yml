@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: set VISUAL_STUDIO_GENERATOR
         shell: bash
-        run |
+        run: |
           if grep 2019 /c/imagedata.json ; then
             echo "VISUAL_STUDIO_GENERATOR=Visual Studio 16 2019" | tee -a $GITHUB_ENV
           else #if grep 2019 /c/imagedata.json ; 
