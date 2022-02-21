@@ -3,8 +3,9 @@ on:
   push:
 jobs:
   test-vsdevenv-shell:
-    matrix:
-      os: [ windows-2019, windows-2022 ]
+    stragegy:
+      matrix:
+        os: [ windows-2019, windows-2022 ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
