@@ -8,6 +8,14 @@ jobs:
         os: [ windows-2019, windows-2022 ]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: set VISUAL_STUDIO_GENERATOR
+        shell: bash
+        run |
+          if grep 2019 /c/imagedata.json ; then
+            echo "VISUAL_STUDIO_GENERATOR=Visual Studio 16 2019" | tee -a $GITHUB_ENV
+          else #if grep 2019 /c/imagedata.json ; 
+            echo "VISUAL_STUDIO_GENERATOR=Visual Studio 17 2022" | tee -a $GITHUB_ENV
+          fi
       - uses: actions/checkout@v2
       - uses: ./
 
@@ -66,7 +74,7 @@ jobs:
       - name: cmake test -- vsdevenv x64 bash -A x64
         shell: vsdevenv x64 bash {0}
         run: |
-          cmake -A x64 -G "Visual Studio 16 2019" -B tests/build-Ax64 -S tests -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=.
+          cmake -A x64 -G "$VISUAL_STUDIO_GENERATOR" -B tests/build-Ax64 -S tests -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=.
           cmake --build tests/build-Ax64 --config release
           ls -l tests/build-Ax64/helloworld.exe
           ./tests/build-Ax64/helloworld.exe 1 2 3 4
@@ -82,7 +90,7 @@ jobs:
       - name: cmake test -- vsdevenv x86 cmd -A Win32
         shell: vsdevenv x86 cmd {0}
         run: |
-          cmake -A Win32 -G "Visual Studio 16 2019" -B tests\build-Ax86 -S tests -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. || exit /b %errorlevel%
+          cmake -A Win32 -G "$VISUAL_STUDIO_GENERATOR" -B tests\build-Ax86 -S tests -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. || exit /b %errorlevel%
           cmake --build tests\build-Ax86 --config release || exit /b %errorlevel%
           dir tests\build-Ax86\helloworld.exe
           tests\build-Ax86\helloworld.exe 1 2 3 4
