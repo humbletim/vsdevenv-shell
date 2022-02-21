@@ -54,7 +54,7 @@ jobs:
           echo "$(env | wc -l) environment variables defined"
 ```
 
-For additional examples please see this action's [.github/workflow/ci.yml](.github/workflow/ci.yml) integration tests.
+For additional examples please see this action's [.github/workflows/ci.yml](.github/workflows/ci.yml) integration tests.
 
 ### See also:
 - [Visual Studio Developer Command Prompt](https://docs.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell?view=vs-2019)
