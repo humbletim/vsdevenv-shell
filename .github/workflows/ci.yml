@@ -1,14 +1,21 @@
 name: test vsdevenv-shell
 on:
   push:
+  workflow_dispatch:
+      inputs:
+        extra_tests:
+          description: 'Enable additional CI settings'
+          required: false
+          default: false
 jobs:
   test-vsdevenv-shell:
     strategy:
       matrix:
-        os: [ windows-2019, windows-2022 ]
+        os: [ windows-2019, windows-2022, ubuntu-latest, macOS-latest ]
     runs-on: ${{ matrix.os }}
     steps:
       - name: set VISUAL_STUDIO_GENERATOR
+        if: ${{ runner.os == 'Windows' }}
         shell: bash
         run: |
           if grep 2019 /c/imagedata.json ; then
@@ -20,6 +27,7 @@ jobs:
       - uses: ./
 
       - name: Setup tmate session
+        if: ${{ contains(github.event.inputs.extra_tests, format('tmate-{0}', runner.os)) }}
         uses: mxschmitt/action-tmate@v3.9
         with:
           limit-access-to-actor: true
@@ -31,6 +39,7 @@ jobs:
           echo "$(env | wc -l) environment variables defined"
 
       - name: specific step (executed within vsdevcmd.bat environment)
+        continue-on-error: ${{ runner.os != 'Windows' }}
         shell: vsdevenv x64 bash {0}
         run: |
           echo "$(env | wc -l) environment variables defined"
@@ -48,22 +57,27 @@ jobs:
         run: echo test 1 2 3
 
       - name: Verify MSVC wrapper -- bash
+        continue-on-error: ${{ runner.os != 'Windows' }}
         shell: vsdevenv x64 bash {0}
         run: cl
 
       - name: Verify MSVC wrapper -- cmd
+        continue-on-error: ${{ runner.os != 'Windows' }}
         shell: vsdevenv x86 cmd {0}
         run: cl
 
       - name: Verify MSVC wrapper -- powershell
+        continue-on-error: ${{ runner.os != 'Windows' }}
         shell: vsdevenv arm64 powershell {0}
         run: cl
 
       - name: Verify MSVC wrapper -- pwsh
+        continue-on-error: ${{ runner.os != 'Windows' }}
         shell: vsdevenv arm64 pwsh {0}
         run: cl
 
       - name: cmake test -- vsdevenv x64 cmd 
+        continue-on-error: ${{ runner.os != 'Windows' }}
         shell: vsdevenv x64 cmd {0}
         run: |
           cmake -G "NMake Makefiles" -B tests\build-x64 -S tests -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. || exit /b %errorlevel%
@@ -72,6 +86,7 @@ jobs:
           tests\build-x64\helloworld.exe 1 2 3 4
 
       - name: cmake test -- vsdevenv x64 bash -A x64
+        continue-on-error: ${{ runner.os != 'Windows' }}
         shell: vsdevenv x64 bash {0}
         run: |
           cmake -A x64 -G "$VISUAL_STUDIO_GENERATOR" -B tests/build-Ax64 -S tests -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=.
@@ -80,6 +95,7 @@ jobs:
           ./tests/build-Ax64/helloworld.exe 1 2 3 4
 
       - name: cmake test -- vsdevenv x86 powershell
+        continue-on-error: ${{ runner.os != 'Windows' }}
         shell: vsdevenv x86 powershell {0}
         run: |
           cmake -G "NMake Makefiles" -B tests\build-x86 -S tests -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=.
@@ -88,6 +104,7 @@ jobs:
           tests\build-x86\helloworld.exe 1 2 3 4
 
       - name: cmake test -- vsdevenv x86 cmd -A Win32
+        continue-on-error: ${{ runner.os != 'Windows' }}
         shell: vsdevenv x86 cmd {0}
         run: |
           cmake -A Win32 -G "$VISUAL_STUDIO_GENERATOR" -B tests\build-Ax86 -S tests -DCMAKE_BUILD_TYPE=Release -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. || exit /b %errorlevel%
