@@ -1,5 +1,5 @@
 name: 'vsdevenv-shell'
-description: 'provides a custom shell for invoking job steps within a vsdevcmd.bat developer environment'
+description: 'Provides a custom shell for invoking individual job steps within a Visual Studio vsdevcmd.bat developer environment.'
 branding:
   icon: 'play'
   color: 'red'
