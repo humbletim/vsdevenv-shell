@@ -3,10 +3,15 @@ on:
   push:
 jobs:
   test-vsdevenv-shell:
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v2
       - uses: ./
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3.9
+        with:
+          limit-access-to-actor: true
 
       - name: an earlier build step
         shell: bash
