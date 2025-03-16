@@ -10,7 +10,22 @@ runs:
       shell: bash
       run: |
         if [[ $RUNNER_OS == 'Windows' ]] ; then
-          echo $GITHUB_ACTION_PATH/bin >> $GITHUB_PATH
+          echo $GITHUB_ACTION_PATH/bin | tee -a $GITHUB_PATH
         else
-          echo "NOTE: skipping vsdevenv-shell integration (RUNNER_OS is $RUNNER_OS, not Windows)"
+          echo "NOTE: emulating vsdevenv-shell integration (since RUNNER_OS is $RUNNER_OS, not Windows)"
+          echo $GITHUB_ACTION_PATH/bin | tee -a $GITHUB_PATH
+          cat<<-'EOF' > $GITHUB_ACTION_PATH/bin/vsdevenv
+        #!/bin/bash
+        set -e
+        shift # x86
+        subshell=$1
+        shift # subshell
+        case $subshell in
+          bash) bash --noprofile --norc -e -o pipefail "$1" ;;
+          pwsh|powershell) pwsh -command "\$ErrorActionPreference = 'stop' ; get-content '$1' | Invoke-Expression ; if ((Test-Path -LiteralPath variable:\\LASTEXITCODE)) { exit \$LASTEXITCODE }" ;;
+          *) echo "skipping subshell=$subshell on $RUNNER_OS" ; exit 0 ;;
+        esac
+        EOF
+          chmod a+x $GITHUB_ACTION_PATH/bin/vsdevenv
+          cat $GITHUB_ACTION_PATH/bin/vsdevenv
         fi

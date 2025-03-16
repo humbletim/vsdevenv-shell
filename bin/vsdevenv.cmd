@@ -1,7 +1,8 @@
 @echo off
 @setlocal
 @FOR /F "tokens=*" %%g IN ('"bash %~dp0\..\utils\findvsdevcmd.sh"') do (SET vsdevcmd=%%g)
-echo [vsdevcmd] arch=%1 shell=%2 script=%3 vsdevcmd=%vsdevcmd% 
+echo [vsdevcmd] arch=%1 shell=%2 script=%3 vsdevcmd=%vsdevcmd%
+if "%vsdevcmd%" == "" ( echo "ERROR: could not locate vsdevcmd.bat" & exit /b 200 )
 @call %vsdevcmd% -no_logo -arch=%1 -host_arch=amd64
 @FOR /F "tokens=*" %%g IN ('"bash %~dp0\..\utils\findmlexepath.sh"') do (SET msvc_mlpath=%%g)
 @REM echo [vsdevcmd] arch=%1 shell=%2 script=%3 msvc_mlpath=%msvc_mlpath% 
