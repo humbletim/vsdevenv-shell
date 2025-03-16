@@ -1,4 +1,4 @@
-# vsdevenv-shell v1
+# vsdevenv-shell v2
 
 [![test vsdevenv-shell](https://github.com/humbletim/vsdevenv-shell/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/humbletim/vsdevenv-shell/actions/workflows/ci.yml)
 
@@ -32,8 +32,8 @@ jobs:
   main:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: humbletim/vsdevenv-shell@v1
+      - uses: actions/checkout@v4
+      - uses: humbletim/vsdevenv-shell@v2
 
       - name: regular build step
         shell: bash
